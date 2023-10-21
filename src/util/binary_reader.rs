@@ -6,8 +6,8 @@ use std::string::FromUtf8Error;
 pub struct BinaryReader {
     pub(crate) big_endian: bool,
     steps: VecDeque<usize>,
-    memory: Vec<u8>,
-    position: usize,
+    pub(crate) memory: Vec<u8>,
+    pub(crate) position: usize,
 }
 
 impl BinaryReader {
@@ -24,12 +24,19 @@ impl BinaryReader {
         return self.memory.len();
     }
 
-    pub(crate) fn set_position(&mut self, new_position: usize) {
-        self.position = new_position;
+    pub(crate) fn skip(&mut self, length: usize) {
+        self.position += length;
     }
 
-    pub(crate) fn set_memory(&mut self, new_memory: Vec<u8>) {
-        self.memory = new_memory;
+    pub(crate) fn assert_value<T>(&mut self, value: T, options: &[T]) -> T
+    where
+        T: PartialEq + std::fmt::Debug,
+    {
+        if options.contains(&value) {
+            value
+        } else {
+            panic!("Value not found in the list of options: {:?}", value);
+        }
     }
 
     // READ
@@ -80,6 +87,32 @@ impl BinaryReader {
         Ok(values)
     }
 
+    // Read a span view of data
+    pub fn read_span_view<T>(&mut self, count: usize) -> Result<&[T], Error>
+    where
+        T: Default,
+    {
+        let size = std::mem::size_of::<T>() * count;
+
+        if self.position + size > self.memory.len() {
+            return Err(Error::new(
+                ErrorKind::UnexpectedEof,
+                "Reached end of memory while reading",
+            ));
+        }
+
+        let data = &self.memory[self.position..self.position + size];
+        self.position += size;
+
+        let data_ptr = data.as_ptr() as *const T;
+        let elements = data.len() / std::mem::size_of::<T>();
+
+        // Safety: Converting a slice of bytes into a slice of type T.
+        let typed_slice = unsafe { std::slice::from_raw_parts(data_ptr, elements) };
+
+        Ok(typed_slice)
+    }
+
     
     pub fn get_value<T, F>(&mut self, offset: usize, read_func: F) -> T
     where
@@ -107,6 +140,12 @@ impl BinaryReader {
 
 
     //************ Byte **************/ 
+
+    pub(crate) fn assert_byte(&mut self, options: &[u8]) -> u8 {
+        let value = self.read_byte();
+        return self.assert_value(value, options);
+    }
+
     pub(crate) fn read_byte(&mut self) -> u8 {
         self.read::<u8>()
     }
@@ -124,8 +163,32 @@ impl BinaryReader {
         bytes
     }
 
+    pub(crate) fn get_bytes(&mut self, offset: usize, length: usize) -> Vec<u8> {
+        self.step_in(offset);
+        let result = self.read_bytes(length);
+        self.step_out();
+        return result;
+    }
+
 
     //************ String **************/ 
+    pub(crate) fn assert_ascii(&mut self, values: &[&str]) -> Result<String, Error> {
+        // Read an ASCII string from the binary reader.
+        let s = self.read_ascii(values[0].len())?;
+    
+        // Check if the read string matches any of the expected values.
+        if !values.contains(&s.as_str()) {
+            // If there's a mismatch, return an error with an error message.
+            return Err(Error::new(
+                io::ErrorKind::InvalidData,
+                format!("Read ASCII: {} | Expected ASCII: {}", s, values.join(", ")),
+            ));
+        }
+    
+        // If the read string matches an expected value, return it as a String in the Ok variant.
+        Ok(s)
+    }
+
     pub(crate) fn read_chars(&mut self, encoding: &str, length: usize) -> Result<String, Error> {
         let bytes = self.read_bytes(length);
         let result = match encoding.to_lowercase().as_str() {
@@ -158,7 +221,12 @@ impl BinaryReader {
 
 
     //************ i32 **************/ 
-    pub(crate) fn read_int32(&mut self) -> i32 {
+    pub(crate) fn assert_i32(&mut self, options: &[i32]) -> i32 {
+        let value = self.read_i32();
+        return self.assert_value(value, options);
+    }
+
+    pub(crate) fn read_i32(&mut self) -> i32 {
         if self.big_endian {
             let i = self.read::<i32>();
             return i.to_be();
@@ -166,8 +234,8 @@ impl BinaryReader {
         self.read::<i32>()
     }
 
-    pub(crate) fn get_int32(&mut self, offset: usize) -> i32 {
-        let read_value = |reader: &mut BinaryReader| reader.read_int32();
+    pub(crate) fn get_i32(&mut self, offset: usize) -> i32 {
+        let read_value = |reader: &mut BinaryReader| reader.read_i32();
         self.get_value(offset, read_value)
     }
 

@@ -1,12 +1,12 @@
 use std::fs::File;
-use std::io::{BufReader, Read};
+use std::io::{Error,BufReader, Read};
 use std::path::PathBuf;
-use crate::sf_util::SFUtil;
-use crate::binary_reader::BinaryReader;
+use crate::util::SFUtil;
+use crate::util::BinaryReader;
 use crate::dcx::CompressionType;
 
 // Common functions for all souls filetypes
-pub trait SoulsFileReader: Default {
+pub trait SoulsFile: Default {
     fn is(&self, br: &mut BinaryReader) -> bool;
     fn read(file_path: &PathBuf) -> Self {
         // Create an instance of the specified type using the default constructor.
@@ -33,7 +33,7 @@ pub trait SoulsFileReader: Default {
         let mut compression = CompressionType::Unknown;
 
         // Check and decompress the file if necessary
-        SFUtil::decompress_if_neccessary(&mut br, &mut compression);
+        SFUtil::decompress_if_neccessary(&mut br, &mut compression).expect("Error in decompressing!");
 
         // Delegate to the specific implementation for the provided reader
         self.specific_read(&mut br);

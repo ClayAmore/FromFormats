@@ -1,10 +1,10 @@
-use crate::binary_reader::BinaryReader;
-pub use crate::souls_file_reader::SoulsFileReader;
+use crate::util::BinaryReader;
+pub use crate::util::SoulsFile;
 
 pub struct FLVER2 {
 }
 
-impl SoulsFileReader for FLVER2 {
+impl SoulsFile for FLVER2 {
     fn is(&self, br: &mut BinaryReader) -> bool {
         todo!()
     }
