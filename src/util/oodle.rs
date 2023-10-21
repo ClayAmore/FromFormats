@@ -97,6 +97,7 @@ fn can_use_oodle8() -> bool {
 
 #[repr(u32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum FuzzSafe {
     OodleLZ_FuzzSafe_No = 0,
     OodleLZ_FuzzSafe_Yes = 1,
@@ -104,6 +105,7 @@ pub(crate) enum FuzzSafe {
 
 #[repr(i32)]
 #[derive(Debug, Clone, Copy)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_CompressionLevel {
     OodleLZ_CompressionLevel_None = 0,
     OodleLZ_CompressionLevel_SuperFast = 1,
@@ -128,6 +130,7 @@ pub(crate) enum OodleLZ_CompressionLevel {
 
 #[repr(i32)]
 #[derive(Debug, Clone, Copy)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_Compressor {
     OodleLZ_Compressor_Invalid = -1,
     OodleLZ_Compressor_None = 3,
@@ -153,6 +156,7 @@ pub(crate) enum OodleLZ_Compressor {
 
 #[repr(u32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_CheckCRC {
     OodleLZ_CheckCRC_No = 0,
     OodleLZ_CheckCRC_Yes = 1,
@@ -161,6 +165,7 @@ pub(crate) enum OodleLZ_CheckCRC {
 
 #[repr(i32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_Decode_ThreadPhase {
     OodleLZ_Decode_ThreadPhase1 = 1,
     OodleLZ_Decode_ThreadPhase2 = 2,
@@ -169,6 +174,7 @@ pub(crate) enum OodleLZ_Decode_ThreadPhase {
 
 #[repr(u32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_FuzzSafe {
     OodleLZ_FuzzSafe_No = 0,
     OodleLZ_FuzzSafe_Yes = 1,
@@ -176,6 +182,7 @@ pub(crate) enum OodleLZ_FuzzSafe {
 
 #[repr(u32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_Profile {
     OodleLZ_Profile_Main = 0,
     OodleLZ_Profile_Reduced = 1,
@@ -184,6 +191,7 @@ pub(crate) enum OodleLZ_Profile {
 
 #[repr(u32)]
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
 pub(crate) enum OodleLZ_Verbosity {
     OodleLZ_Verbosity_None = 0,
     OodleLZ_Verbosity_Minimal = 1,

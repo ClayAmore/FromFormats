@@ -2,10 +2,11 @@ use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
 use crate::util::oodle::*;
 
-use std::io::{Error, ErrorKind};
-use libc::{c_void, c_uchar, c_ulong, c_int, c_uint};
+use std::io::Error;
+use libc::{c_ulong, c_int, c_uint};
 
 #[derive(WrapperApi)]
+#[allow(non_snake_case)]
 struct OodleApi {
     OodleLZ_Decompress: unsafe extern "C" fn(
         compBuf: *const u8,

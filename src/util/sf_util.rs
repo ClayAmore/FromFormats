@@ -1,7 +1,7 @@
 use std::io::{Cursor, Read, Error};
 use flate2::read::ZlibDecoder;
 
-use crate::dcx::{DCX, CompressionType};
+use crate::formats::{DCX, CompressionType};
 use crate::util::binary_reader::BinaryReader;
 
 pub(crate) struct SFUtil {

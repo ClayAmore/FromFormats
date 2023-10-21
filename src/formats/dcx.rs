@@ -1,8 +1,9 @@
-use crate::util::BinaryReader;
-use crate::util::SFUtil;
-use crate::util::Oodle;
+use crate::util::binary_reader::BinaryReader;
+use crate::util::sf_util::SFUtil;
+use crate::util::oodle::Oodle;
 use std::io::{Error, ErrorKind, Cursor, Write};
 
+#[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum CompressionType {
     Unknown,

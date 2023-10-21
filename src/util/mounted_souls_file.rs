@@ -4,16 +4,18 @@ use std::path::PathBuf;
 use crate::util::sf_util::SFUtil;
 use crate::util::binary_reader::BinaryReader;
 use crate::formats::CompressionType;
+use crate::util::souls_file::SoulsFile;
 
 // Common functions for all souls filetypes
-pub trait SoulsFile: Default {
+pub trait MountedSoulsFile: SoulsFile {
     fn is(&self, br: &mut BinaryReader) -> bool;
     fn read(file_path: &PathBuf) -> Self {
         // Create an instance of the specified type using the default constructor.
         let format = Self::default();
 
         // Read and initialize the instance from the provided file path.
-        format.common_read(file_path);
+        
+        MountedSoulsFile::common_read(&format,file_path);
 
         // Return the initialized instance.
         return format;
@@ -36,7 +38,7 @@ pub trait SoulsFile: Default {
         SFUtil::decompress_if_neccessary(&mut br, &mut compression).expect("Error in decompressing!");
 
         // Delegate to the specific implementation for the provided reader
-        self.specific_read(&mut br);
+        MountedSoulsFile::specific_read(self, &mut br);
     }
     fn specific_read(&self, br: &mut BinaryReader);
 }

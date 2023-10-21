@@ -2,8 +2,8 @@ use dlopen::wrapper::{Container, WrapperApi};
 use dlopen_derive::WrapperApi;
 use crate::util::oodle::*;
 
-use std::io::{Error, ErrorKind};
-use libc::{c_void, c_uchar, c_ulong, c_int, c_uint};
+use std::io::Error;
+use libc::{c_ulong, c_int, c_uint};
 
 #[derive(WrapperApi)]
 struct OodleApi {

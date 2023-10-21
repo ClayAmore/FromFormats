@@ -1,5 +1,5 @@
-use crate::util::BinaryReader;
-pub use crate::util::SoulsFile;
+use crate::util::binary_reader::BinaryReader;
+use crate::util::SoulsFile;
 
 pub struct FLVER2 {
 }

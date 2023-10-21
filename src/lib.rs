@@ -1,4 +1,6 @@
 pub mod util;
-pub mod dcx;
-pub mod flver2;
+pub mod formats;
 
+pub mod prelude {
+    pub use super::util::{SoulsFile, MountedSoulsFile};
+}
