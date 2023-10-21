@@ -1,6 +1,6 @@
 use crate::util::BinaryReader;
 use crate::util::SFUtil;
-use crate::util::Oodle26;
+use crate::util::Oodle;
 use std::io::{Error, ErrorKind, Cursor, Write};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -104,7 +104,7 @@ impl DCX {
                     return DCX::decompress_dcx_dflt(br, compression);
                 }
                 CompressionType::DCX_KRAK => {
-                    return DCX::decompress_dcx_krak(br);
+                    return DCX::decompress_dcx_krak(br, None);
                 }
                 _ => {
                     return Err(Error::new(
@@ -359,7 +359,14 @@ impl DCX {
 
     }
 
-    fn decompress_dcx_krak(br: &mut BinaryReader) -> Result<Vec<u8>, Error> {
+    fn decompress_dcx_krak(br: &mut BinaryReader, compression_level: Option<u8>) -> Result<Vec<u8>, Error> {
+
+        // Default value for compression_level 6 if no value specified in the params
+        let compression_level_result = match compression_level {
+            Some(cl) => cl,
+            None => 6
+        };
+
         println!("decompress_dcx_krak");
         br.assert_ascii(&["DCX\0"])?;
         br.assert_i32(&[0x11000]);
@@ -367,16 +374,16 @@ impl DCX {
         br.assert_i32(&[0x24]);
         br.assert_i32(&[0x44]);
         br.assert_i32(&[0x4C]);
-
         br.assert_ascii(&["DCS\0"])?;
         let uncompressed_size = br.read_i32();
         let compressed_size = br.read_i32();
-
-        
         br.assert_ascii(&["DCP\0"])?;
         br.assert_ascii(&["KRAK"])?;
         br.assert_i32(&[0x20]);
-        br.assert_i32(&[0x6000000]);
+        br.assert_byte(&[compression_level_result]);
+        br.assert_byte(&[0]);
+        br.assert_byte(&[0]);
+        br.assert_byte(&[0]);
         br.assert_i32(&[0]);
         br.assert_i32(&[0]);
         br.assert_i32(&[0]);
@@ -384,11 +391,10 @@ impl DCX {
         br.assert_ascii(&["DCA\0"])?;
         br.assert_i32(&[8]);
 
-        let compressed: &[u8] = br.read_span_view(compressed_size as usize)?;
-        println!("Size of compressed is: {:?}", compressed.len());
-        println!("Compressed: {:?}", compressed);
-        let mut oodle26 = Oodle26::new();
         
-        return oodle26.decompress(compressed, uncompressed_size as usize);
+        let compressed: &[u8] = br.read_span_view(compressed_size as usize)?;
+        let mut compressor = Oodle::get_oodle_compressor(compression_level_result as i32)?;
+        return compressor.decompress(compressed, uncompressed_size as usize);
+
     }
 }

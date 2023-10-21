@@ -1,13 +1,18 @@
+use std::env;
 use std::io::Error;
 use crate::util::oodle26::Oodle26;
+use crate::util::oodle28::Oodle28;
 
 
-pub(crate) trait OodleCompressor {
+pub trait OodleCompressor {
     fn decompress(&mut self, source: &[u8], uncompressed_size: usize) -> Result<Vec<u8>, Error>;
 }
 
-pub struct Oodle {
+static mut  OODLE6_EXISTS: bool = false;
+static mut  OODLE8_EXISTS: bool = false;
 
+pub struct Oodle {
+    
 }
 
 impl Oodle {
@@ -17,27 +22,76 @@ impl Oodle {
 
             if compression_level == 9 {
 
+                if can_use_oodle8() {
+                    return Ok(Box::new(Oodle28::new()));
+                }
+                
+                if can_use_oodle6() {
+                    return Ok(Box::new(Oodle26::new()));
+                }
+
             }
             else if compression_level == 6 {
 
+                if can_use_oodle6() {
+                    return Ok(Box::new(Oodle26::new()));
+                }
+                
+                if can_use_oodle8() {
+                    return Ok(Box::new(Oodle28::new()));
+                }
             }
         }
         else {
-
+            if can_use_oodle6() {
+                return Ok(Box::new(Oodle26::new()));
+            }
+            if can_use_oodle8() {
+                return Ok(Box::new(Oodle28::new()));
+            }
         }
-
-        Ok(Box::new(Oodle26::new()))
+        
+        return Err(Error::new(std::io::ErrorKind::NotFound, "Could not find a supported version of oo2core.\n \
+            Please copy oo2core_6_win64.dll or oo2core_8_win64.dll into the program directory"))
     }
 }
 
 fn can_use_oodle6() -> bool {
-
-    return false;
+    unsafe {
+        if OODLE6_EXISTS  {
+            return true;
+        }
+        
+        if let Ok(mut current_dir) = env::current_exe() {
+            current_dir.pop();
+            let current_dir_string = current_dir.to_str();
+            println!("{:?}",current_dir_string);
+            let oodle6 = current_dir.join("oo2core_6_win64.dll");
+            if oodle6.exists()  {
+                OODLE6_EXISTS = true;
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 fn can_use_oodle8() -> bool {
-
-    return false;
+    unsafe {
+        if OODLE8_EXISTS {
+            return true;
+        }
+        
+        if let Ok(mut current_dir) = env::current_exe() {
+            current_dir.pop();
+            let oodle8 = current_dir.join("oo2core_8_win64.dll");
+            if oodle8.exists()  {
+                OODLE8_EXISTS = true;
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
